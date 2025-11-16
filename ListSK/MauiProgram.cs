@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using ListSK.Models;
+using ListSK.ViewModels;
+using Microsoft.Extensions.Logging;
 
 namespace ListSK
 {
@@ -14,9 +16,15 @@ namespace ListSK
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
+            builder.Services.AddSingleton<App>();
+            builder.UseMauiApp<App>();
+
+            builder.Services.AddSingleton<MainListViewModel>();
+            builder.Services.AddTransient<AddPageModel>();
+
 
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
             return builder.Build();

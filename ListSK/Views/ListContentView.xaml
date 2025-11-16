@@ -1,15 +1,22 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="ListSK.Views.ListContentView">
+             xmlns:models="clr-namespace:ListSK.Models"
+             x:Class="ListSK.Views.ListContentView"
+             x:DataType="models:ProductModel">
     <Frame Padding="10">
-        <Grid ColumnDefinitions="*,*">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <Label Text="name" Grid.ColumnSpan="2"/>
-            <Entry Text="count" Grid.Row="1"/>
-            <Label Text="unit" Grid.Row="1" Grid.Column="1"/>
+        <FlyoutBase.ContextFlyout>
+            <MenuFlyout>
+                <MenuFlyoutItem Text="Usuń produkt" Command="{Binding Source={x:Reference MainListRoot}, Path=BindingContext.RemoveProductCommand}"/>
+            </MenuFlyout>
+        </FlyoutBase.ContextFlyout>
+        
+        <Grid ColumnDefinitions="*,*,*" RowDefinitions="*,*,*">
+            <Label Text="{Binding Name}" Grid.ColumnSpan="2"/>
+            <Switch IsToggled="{Binding IsBought}"/>
+
+            <Entry Text="{Binding Amount}" Grid.Row="1" />
+            <Label Text="{Binding Unit}" Grid.Row="1" Grid.Column="1"/>
         </Grid>
     </Frame>
 </ContentView>

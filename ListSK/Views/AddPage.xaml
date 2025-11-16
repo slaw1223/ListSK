@@ -17,11 +17,17 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Entry Placeholder="Produkt" Margin="5"/>
+            
+            <Entry Placeholder="Produkt" 
+                   Text="{Binding Name}" 
+                   Margin="5"/>
+            
             <Picker x:Name="category"
-                    Title="Wybierz kategorię"
+                    Title="Kategoria"
                     Grid.Column="1"
+                    SelectedItem="{Binding Category}"
                     Margin="5">
+                
                 <Picker.ItemsSource>
                     <x:Array Type="{x:Type x:String}">
                         <x:String>Nabiał</x:String>
@@ -29,14 +35,19 @@
                     </x:Array>
                 </Picker.ItemsSource>
             </Picker>
+            
             <Entry Placeholder="Ilość"
                    Grid.Row="1"
+                   Text="{Binding Amount}"
                    Margin="5"/>
+            
             <Picker x:Name="unit"
                     Title="Wybierz jednostkę"
+                    SelectedItem="{Binding Unit}"
                     Grid.Row="1"
                     Grid.Column="1"
                     Margin="5">
+                
                 <Picker.ItemsSource>
                     <x:Array Type="{x:Type x:String}">
                         <x:String>szt</x:String>
@@ -45,14 +56,19 @@
                     </x:Array>
                 </Picker.ItemsSource>
             </Picker>
-                <Button Text="Dodaj produkt"
-                        Grid.Row="2"
-                        Grid.ColumnSpan="2"
-                        Margin="5"/>
+            
+            <Button Text="Dodaj produkt"
+                    Grid.Row="2"
+                    Grid.ColumnSpan="2"
+                    Margin="5"
+                    Command="{Binding AddProductCommand}"/>
+            
+            
 
             <Entry Placeholder="Nowa kategoria"
                    Grid.Row="3"
                    Margin="5"/>
+            
             <Button Text="Dodaj kategorię"
                     Grid.Row="3"
                     Grid.Column="1"
