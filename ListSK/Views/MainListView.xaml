@@ -8,6 +8,7 @@
              x:Name="MainListRoot"
              x:DataType="viewModels:MainListViewModel"
              >
+    
     <CollectionView ItemsSource="{Binding Products}">
         <CollectionView.ItemTemplate>
             <DataTemplate>

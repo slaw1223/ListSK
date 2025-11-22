@@ -4,19 +4,20 @@
              xmlns:models="clr-namespace:ListSK.Models"
              x:Class="ListSK.Views.ListContentView"
              x:DataType="models:ProductModel">
-    <Frame Padding="10">
+    <Frame Padding="10" BorderColor="Blue" WidthRequest="200" Margin="10">
         <FlyoutBase.ContextFlyout>
             <MenuFlyout>
                 <MenuFlyoutItem Text="Usuń produkt" Command="{Binding Source={x:Reference MainListRoot}, Path=BindingContext.RemoveProductCommand}"/>
             </MenuFlyout>
         </FlyoutBase.ContextFlyout>
-        
-        <Grid ColumnDefinitions="*,*,*" RowDefinitions="*,*,*">
-            <Label Text="{Binding Name}" Grid.ColumnSpan="2"/>
-            <Switch IsToggled="{Binding IsBought}"/>
 
-            <Entry Text="{Binding Amount}" Grid.Row="1" />
-            <Label Text="{Binding Unit}" Grid.Row="1" Grid.Column="1"/>
+        <Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="*,*,*">
+            <Label Text="{Binding Name}" Grid.ColumnSpan="2" FontSize="Large"/>
+            <CheckBox IsChecked="{Binding IsBought}" Grid.Column="2"/>
+            
+            <Entry Text="{Binding Amount}" Grid.Row="1" WidthRequest="50"/>
+            <Label Text="{Binding Unit}" Grid.Row="1" Grid.Column="1" FontSize="Medium"/>
+            <Label Text="{Binding Category}" Grid.Row="2"/>
         </Grid>
     </Frame>
 </ContentView>

@@ -17,11 +17,12 @@ namespace ListSK.Models
         {
             _mainVM = mainVM;
         }
-
+        
         [ObservableProperty] private string name;
         [ObservableProperty] private string category;
         [ObservableProperty] private string unit;
         [ObservableProperty] private string amount;
+        [ObservableProperty] private bool isOptional;
 
         [RelayCommand]
         private void AddProduct()
@@ -32,7 +33,8 @@ namespace ListSK.Models
                 Category = Category,
                 Unit = Unit,
                 Amount = Amount,
-                IsBought = false
+                IsBought = false,
+                IsOptional = IsOptional
             };
 
             _mainVM.AddProduct(product);
@@ -41,6 +43,7 @@ namespace ListSK.Models
             Category = "";
             Unit = "";
             Amount = "";
+            IsOptional = false;
         }
     }
 }
