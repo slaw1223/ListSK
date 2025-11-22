@@ -13,6 +13,7 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -22,21 +23,14 @@
             <Entry Placeholder="Produkt" 
                    Text="{Binding Name}" 
                    Margin="5"/>
-            
+
             <Picker x:Name="category"
                     Title="Kategoria"
                     Grid.Column="1"
                     SelectedItem="{Binding Category}"
-                    Margin="5">
-                
-                <Picker.ItemsSource>
-                    <x:Array Type="{x:Type x:String}">
-                        <x:String>Nabiał</x:String>
-                        <x:String>Pieczywo</x:String>
-                    </x:Array>
-                </Picker.ItemsSource>
-            </Picker>
-            
+                    ItemsSource="{Binding Categories}"
+                    Margin="5"/>
+
             <Entry Placeholder="Ilość"
                    Grid.Row="1"
                    Text="{Binding Amount}"
@@ -63,7 +57,7 @@
             
             <Label Text="Czy jest opcjonalne?"
                    Grid.Row="2"
-                   Grid.Column="1"/>
+                   Margin="30,10,0,0"/>
 
             <Button Text="Dodaj produkt"
                     Grid.Row="3"
@@ -74,13 +68,16 @@
             
 
             <Entry Placeholder="Nowa kategoria"
+                   Text="{Binding NewCategory}"
                    Grid.Row="4"
                    Margin="5"/>
             
             <Button Text="Dodaj kategorię"
+                    Command="{Binding AddNewCategoryCommand}"
                     Grid.Row="4"
                     Grid.Column="1"
                     Margin="5"/>
+            
             
         </Grid>
     </VerticalStackLayout>

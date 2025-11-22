@@ -4,20 +4,42 @@
              xmlns:models="clr-namespace:ListSK.Models"
              x:Class="ListSK.Views.ListContentView"
              x:DataType="models:ProductModel">
-    <Frame Padding="10" BorderColor="Blue" WidthRequest="200" Margin="10">
+    <Frame
+           BorderColor="Blue"
+           HeightRequest="100"
+           Margin="10">
+
+        <Frame.Triggers>
+            <DataTrigger TargetType="Frame"
+                         Binding="{Binding IsOptional}"
+                         Value="True">
+                <Setter Property="BorderColor" Value="Red"/>
+            </DataTrigger>
+
+            <DataTrigger TargetType="Frame"
+                         Binding="{Binding IsBought}"
+                         Value="True">
+                <Setter Property="Opacity" Value="0.5"/>
+                <Setter Property="BorderColor" Value="Green"/>
+            </DataTrigger>
+        </Frame.Triggers>
+        
         <FlyoutBase.ContextFlyout>
             <MenuFlyout>
-                <MenuFlyoutItem Text="Usuń produkt" Command="{Binding Source={x:Reference MainListRoot}, Path=BindingContext.RemoveProductCommand}"/>
+                <MenuFlyoutItem Text="Usuń produkt"
+                                Command="{Binding Path=BindingContext.RemoveProductCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                CommandParameter="{Binding .}"/>
             </MenuFlyout>
         </FlyoutBase.ContextFlyout>
+        
 
-        <Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="*,*,*">
-            <Label Text="{Binding Name}" Grid.ColumnSpan="2" FontSize="Large"/>
-            <CheckBox IsChecked="{Binding IsBought}" Grid.Column="2"/>
+        <Grid ColumnDefinitions="Auto,2*,*,*,Auto" RowDefinitions="*" Margin="10" Padding="5">
+            <CheckBox IsChecked="{Binding IsBought}"/>
+            <Label Text="{Binding Name}" FontSize="Large" Grid.Column="1" />
+            <Entry Text="{Binding Amount}" Grid.Column="2" WidthRequest="50" FontSize="Medium"/>
+            <Label Text="{Binding Unit}" Grid.Column="3" FontSize="Medium"/>
+            <Label Text="{Binding Category}" Grid.Column="4" FontSize="Medium"/>
             
-            <Entry Text="{Binding Amount}" Grid.Row="1" WidthRequest="50"/>
-            <Label Text="{Binding Unit}" Grid.Row="1" Grid.Column="1" FontSize="Medium"/>
-            <Label Text="{Binding Category}" Grid.Row="2"/>
         </Grid>
     </Frame>
 </ContentView>

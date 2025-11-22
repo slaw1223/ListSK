@@ -8,12 +8,40 @@
              x:Name="MainListRoot"
              x:DataType="viewModels:MainListViewModel"
              >
-    
-    <CollectionView ItemsSource="{Binding Products}">
-        <CollectionView.ItemTemplate>
-            <DataTemplate>
-                <views:ListContentView/>
-            </DataTemplate>
-        </CollectionView.ItemTemplate>
-    </CollectionView>
+    <VerticalStackLayout>
+        <HorizontalStackLayout 
+        Padding="10"
+        Spacing="20">
+            <Button 
+                Text="Eksportuj Listę"
+                Command="{Binding ExportCommand}"/>
+
+            <Button 
+                Text="Importuj Listę"
+                Command="{Binding ImportCommand}"/>
+
+            <Button
+                Text="Wyczyść Listę"
+                Command="{Binding ClearListCommand}"/>
+
+        </HorizontalStackLayout>
+
+        <CollectionView ItemsSource="{Binding Products}"
+                        SelectionMode="None"
+                        ItemSizingStrategy="MeasureAllItems">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical"
+                                   Span="2"
+                                   HorizontalItemSpacing="10"
+                                   VerticalItemSpacing="10"/>
+            </CollectionView.ItemsLayout>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:ProductModel">
+                    <views:ListContentView/>
+                   
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </VerticalStackLayout>
 </ContentPage>
