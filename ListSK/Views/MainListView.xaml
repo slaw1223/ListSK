@@ -39,6 +39,7 @@
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:ProductModel">
+                        
                         <views:ListContentView/>
 
                     </DataTemplate>

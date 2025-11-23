@@ -24,13 +24,6 @@
             </DataTrigger>
         </Frame.Triggers>
         
-        <FlyoutBase.ContextFlyout>
-            <MenuFlyout>
-                <MenuFlyoutItem Text="Usuń produkt"
-                                Command="{Binding Path=BindingContext.RemoveProductCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
-                                CommandParameter="{Binding .}"/>
-            </MenuFlyout>
-        </FlyoutBase.ContextFlyout>
         
 
         <Grid ColumnDefinitions="Auto,2*,*,*,Auto" RowDefinitions="*" Margin="10">
@@ -39,7 +32,14 @@
             <Entry Text="{Binding Amount}" Grid.Column="2" WidthRequest="50" FontSize="Medium" VerticalOptions="Center"/>
             <Label Text="{Binding Unit}" Grid.Column="3" FontSize="Medium" VerticalOptions="Center"/>
             <Label Text="{Binding Category}" Grid.Column="4" FontSize="Medium" VerticalOptions="Center"/>
-            
+
+            <FlyoutBase.ContextFlyout>
+                <MenuFlyout>
+                    <MenuFlyoutItem Text="Usuń produkt"
+                        Command="{Binding Path=BindingContext.RemoveProductCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                        CommandParameter="{Binding}"/>
+                </MenuFlyout>
+            </FlyoutBase.ContextFlyout>
         </Grid>
     </Frame>
 </ContentView>
