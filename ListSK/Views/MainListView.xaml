@@ -8,40 +8,45 @@
              x:Name="MainListRoot"
              x:DataType="viewModels:MainListViewModel"
              >
-    <VerticalStackLayout>
-        <HorizontalStackLayout 
+    <ScrollView>
+        <VerticalStackLayout>
+            <HorizontalStackLayout 
         Padding="10"
         Spacing="20">
-            <Button 
+                <Button 
                 Text="Eksportuj Listę"
                 Command="{Binding ExportCommand}"/>
 
-            <Button 
+                <Button 
                 Text="Importuj Listę"
                 Command="{Binding ImportCommand}"/>
 
-            <Button
+                <Button
                 Text="Wyczyść Listę"
                 Command="{Binding ClearListCommand}"/>
 
-        </HorizontalStackLayout>
-
-        <CollectionView ItemsSource="{Binding Products}"
+            </HorizontalStackLayout>
+            <CollectionView ItemsSource="{Binding Products}"
                         SelectionMode="None"
-                        ItemSizingStrategy="MeasureAllItems">
-            <CollectionView.ItemsLayout>
-                <GridItemsLayout Orientation="Vertical"
+                        ItemSizingStrategy="MeasureAllItems"
+                        >
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical"
                                    Span="2"
                                    HorizontalItemSpacing="10"
                                    VerticalItemSpacing="10"/>
-            </CollectionView.ItemsLayout>
+                </CollectionView.ItemsLayout>
 
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="models:ProductModel">
-                    <views:ListContentView/>
-                   
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-    </VerticalStackLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:ProductModel">
+                        <views:ListContentView/>
+
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label Text="Kategorie" FontAttributes="Bold" Margin="20"/>
+            <views:CategoriesContentView/>
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

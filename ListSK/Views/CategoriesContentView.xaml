@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:ListSK.ViewModels"
+             xmlns:models="clr-namespace:ListSK.Models"
+             xmlns:views="clr-namespace:ListSK.Views"
+             x:Class="ListSK.Views.CategoriesContentView"
+             x:DataType="viewModels:MainListViewModel">
+    <CollectionView ItemsSource="{Binding CategoryGroups}"
+                    SelectionMode="None"
+                    ItemsLayout="VerticalList">
+        <CollectionView.ItemTemplate>
+            <DataTemplate x:DataType="viewModels:CategoryGroup">
+                <Frame Margin="6" Padding="10" HasShadow="False" BorderColor="Transparent">
+                    <VerticalStackLayout>
+                        <Grid Padding="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Label Text="{Binding Name}" FontAttributes="Bold" VerticalOptions="Start" />
+                            <Label Text="{Binding ProductCount, StringFormat='Ilość: {0}'}" VerticalOptions="Center"/>
+
+                            <Button Grid.Column="1"
+                                    Text="Rozwiń"
+                                    Command="{Binding ToggleCommand}">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button"
+                                                 Binding="{Binding IsExpanded}"
+                                                 Value="True">
+                                        <Setter Property="Text" Value="Zwiń" />
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
+                        </Grid>
+
+                        <CollectionView ItemsSource="{Binding Products}"
+                                        IsVisible="{Binding IsExpanded}"
+                                        SelectionMode="None"
+                                        ItemsLayout="VerticalList">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="models:ProductModel">
+                                    <views:ListContentView />
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </Frame>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+    </CollectionView>
+</ContentView>

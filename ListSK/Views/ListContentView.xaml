@@ -33,12 +33,12 @@
         </FlyoutBase.ContextFlyout>
         
 
-        <Grid ColumnDefinitions="Auto,2*,*,*,Auto" RowDefinitions="*" Margin="10" Padding="5">
+        <Grid ColumnDefinitions="Auto,2*,*,*,Auto" RowDefinitions="*" Margin="10">
             <CheckBox IsChecked="{Binding IsBought}"/>
-            <Label Text="{Binding Name}" FontSize="Large" Grid.Column="1" />
-            <Entry Text="{Binding Amount}" Grid.Column="2" WidthRequest="50" FontSize="Medium"/>
-            <Label Text="{Binding Unit}" Grid.Column="3" FontSize="Medium"/>
-            <Label Text="{Binding Category}" Grid.Column="4" FontSize="Medium"/>
+            <Label Text="{Binding Name}" FontSize="Medium" Grid.Column="1" VerticalOptions="Center"/>
+            <Entry Text="{Binding Amount}" Grid.Column="2" WidthRequest="50" FontSize="Medium" VerticalOptions="Center"/>
+            <Label Text="{Binding Unit}" Grid.Column="3" FontSize="Medium" VerticalOptions="Center"/>
+            <Label Text="{Binding Category}" Grid.Column="4" FontSize="Medium" VerticalOptions="Center"/>
             
         </Grid>
     </Frame>

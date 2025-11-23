@@ -15,6 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Xml.Serialization;
+using ListSK.Services;
 
 namespace ListSK.ViewModels
 {
@@ -25,14 +26,26 @@ namespace ListSK.ViewModels
         [ObservableProperty]
         private ObservableCollection<ProductModel> products = new();
 
+        [ObservableProperty]
+        private ObservableCollection<CategoryGroup> categoryGroups = new();
+
         public MainListViewModel()
         {
+            var categories = CategoryService.LoadCategories();
+            foreach (var category in categories)
+            {
+                CategoryGroups.Add(new CategoryGroup(category));
+            }
             Products.CollectionChanged += Products_CollectionChanged;
             LoadProducts();
         }
 
         public void AddProduct(ProductModel product)
         {
+            if (product == null)
+            {
+                return;
+            }
             Products.Add(product);
             SaveProducts();
         }
@@ -57,6 +70,9 @@ namespace ListSK.ViewModels
                 foreach (ProductModel item in e.NewItems)
                 {
                     item.PropertyChanged += Product_PropertyChanged;
+                    var group = GetOrCreateGroup(item.Category);
+                    if (!group.Products.Contains(item))
+                        group.Products.Add(item);
                 }
             }
             if (e.OldItems != null)
@@ -64,28 +80,77 @@ namespace ListSK.ViewModels
                 foreach (ProductModel item in e.OldItems)
                 {
                     item.PropertyChanged -= Product_PropertyChanged;
+                    foreach (var g in CategoryGroups)
+                        g.Products.Remove(item);
                 }
             }
         }
 
         private void Product_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
+            if (sender is not ProductModel p) return;
+            if (e.PropertyName == nameof(ProductModel.Category))
+            {
+                foreach (var g in CategoryGroups)
+                    g.Products.Remove(p);
+
+                var group = GetOrCreateGroup(p.Category);
+                if (!group.Products.Contains(p))
+                    group.Products.Add(p);
+
+                SaveProducts();
+                return;
+            }
+
             if (e.PropertyName == nameof(ProductModel.IsBought))
             {
-                var sorted = Products
-                    .OrderBy(p => p.IsBought)
-                    .ToList();
 
-                Products.Clear();
+                var sorted = Products.OrderBy(x => x.IsBought).ToList();
 
-                foreach (var p in sorted)
-                    Products.Add(p);
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    Products.CollectionChanged -= Products_CollectionChanged;
+                    Products.Clear();
+                    foreach (var it in sorted)
+                        Products.Add(it);
+                    Products.CollectionChanged += Products_CollectionChanged;
+                });
+
+                var group = CategoryGroups.FirstOrDefault(g => string.Equals(g.Name, p.Category, StringComparison.OrdinalIgnoreCase));
+                if (group != null)
+                {
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        if (group.Products.Contains(p))
+                        {
+                            group.Products.Remove(p);
+                            group.Products.Add(p);
+                        }
+                    });
+                }
+
                 SaveProducts();
+                return;
             }
-            else
+            SaveProducts();
+        }
+        private CategoryGroup GetOrCreateGroup(string category)
+        {
+            var name = category ?? string.Empty;
+            var group = CategoryGroups.FirstOrDefault(g => string.Equals(g.Name, name, StringComparison.OrdinalIgnoreCase));
+            if (group == null)
             {
-                SaveProducts();
+                group = new CategoryGroup(name);
+                CategoryGroups.Add(group);
+
+                var categories = CategoryService.LoadCategories();
+                if (!categories.Contains(name))
+                {
+                    categories.Add(name);
+                    CategoryService.SaveCategories(categories);
+                }
             }
+            return group;
         }
 
         public void SaveProducts()

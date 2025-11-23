@@ -41,12 +41,12 @@ namespace ListSK.Services
 
         public static void AddCategory(string newCat)
         {
-            var cats = LoadCategories();
+            var categories = LoadCategories();
 
-            if (!cats.Contains(newCat))
+            if (!categories.Contains(newCat))
             {
-                cats.Add(newCat);
-                SaveCategories(cats);
+                categories.Add(newCat);
+                SaveCategories(categories);
             }
         }
     }
