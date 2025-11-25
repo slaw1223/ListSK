@@ -17,5 +17,9 @@
             Title="Dodaj"
             ContentTemplate="{DataTemplate views:AddPage}"
             />
+
+        <ShellContent
+            Title="Lista do sklepu"
+            ContentTemplate="{DataTemplate views:ShopingListView}"/>
     </TabBar>
 </Shell>

@@ -5,80 +5,101 @@
              x:Class="ListSK.Views.AddPage"
              x:DataType="models:AddPageModel"
              >
-    <VerticalStackLayout>
-        <Grid Padding="20">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            
-            <Entry Placeholder="Produkt" 
+    <ScrollView>
+        <VerticalStackLayout>
+            <Grid Padding="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Entry Placeholder="Produkt" 
                    Text="{Binding Name}" 
                    Margin="5"/>
 
-            <Picker x:Name="category"
+                <Picker x:Name="category"
                     Title="Kategoria"
                     Grid.Column="1"
                     SelectedItem="{Binding Category}"
                     ItemsSource="{Binding Categories}"
                     Margin="5"/>
 
-            <Entry Placeholder="Ilość"
+                <Entry Placeholder="Ilość"
                    Grid.Row="1"
                    Text="{Binding Amount}"
                    Margin="5"/>
 
-            <Picker x:Name="unit"
+                <Picker x:Name="unit"
                     Title="Wybierz jednostkę"
                     SelectedItem="{Binding Unit}"
                     Grid.Row="1"
                     Grid.Column="1"
                     Margin="5">
 
-                <Picker.ItemsSource>
-                    <x:Array Type="{x:Type x:String}">
-                        <x:String>szt</x:String>
-                        <x:String>l</x:String>
-                        <x:String>kg</x:String>
-                    </x:Array>
-                </Picker.ItemsSource>
-            </Picker>
-            
-            <CheckBox Grid.Row="2"
-                      IsChecked="{Binding IsOptional}"/>
-            
-            <Label Text="Czy jest opcjonalne?"
-                   Grid.Row="2"
-                   Margin="30,10,0,0"/>
+                    <Picker.ItemsSource>
+                        <x:Array Type="{x:Type x:String}">
+                            <x:String>szt</x:String>
+                            <x:String>l</x:String>
+                            <x:String>kg</x:String>
+                        </x:Array>
+                    </Picker.ItemsSource>
+                </Picker>
 
-            <Button Text="Dodaj produkt"
+                <CheckBox Grid.Row="2"
+                      IsChecked="{Binding IsOptional}"/>
+
+                <Label Text="Czy jest opcjonalne?"
+                   Grid.Row="2"
+                   Margin="30,20,0,0"/>
+
+                <Picker x:Name="shop"
+                    Title="Wybierz sklep (opcjonelne)"
+                    SelectedItem="{Binding Shop}"
+                    ItemsSource="{Binding Shops}"
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Margin="5"/>
+
+                <Button Text="Dodaj produkt"
                     Grid.Row="3"
                     Grid.ColumnSpan="2"
                     Margin="5"
                     Command="{Binding AddProductCommand}"/>
-            
-            
 
-            <Entry Placeholder="Nowa kategoria"
+
+
+                <Entry Placeholder="Nowa kategoria"
                    Text="{Binding NewCategory}"
                    Grid.Row="4"
                    Margin="5"/>
-            
-            <Button Text="Dodaj kategorię"
+
+                <Button Text="Dodaj kategorię"
                     Command="{Binding AddNewCategoryCommand}"
                     Grid.Row="4"
                     Grid.Column="1"
                     Margin="5"/>
-            
-            
-        </Grid>
-    </VerticalStackLayout>
+
+                <Entry Placeholder="Nowy sklep"
+                   Text="{Binding NewShop}"
+                   Grid.Row="5"
+                   Margin="5"/>
+
+                <Button Text="Dodaj sklep"
+                    Command="{Binding AddNewShopCommand}"
+                    Grid.Row="5"
+                    Grid.Column="1"
+                    Margin="5"/>
+
+
+            </Grid>
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

@@ -16,5 +16,6 @@ namespace ListSK.Models
         [ObservableProperty] private string amount;
         [ObservableProperty] private bool isBought;
         [ObservableProperty] private bool isOptional;
+        [ObservableProperty] private string shop;
     }
 }

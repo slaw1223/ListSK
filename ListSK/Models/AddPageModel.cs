@@ -15,6 +15,7 @@ namespace ListSK.Models
     {
         private readonly MainListViewModel _mainVM;
         public ObservableCollection<string> Categories { get; set; }
+        public ObservableCollection<string> Shops { get; set; }
 
         [ObservableProperty] private string name;
         [ObservableProperty] private string category;
@@ -23,11 +24,14 @@ namespace ListSK.Models
         [ObservableProperty] private bool isOptional;
         [ObservableProperty] private string selectedCategory;
         [ObservableProperty] private string newCategory;
+        [ObservableProperty] private string shop;
+        [ObservableProperty] private string newShop;
 
         public AddPageModel(MainListViewModel mainVM)
         {
             _mainVM = mainVM;
             Categories = new ObservableCollection<string>(CategoryService.LoadCategories());
+            Shops = new ObservableCollection<string>(ShopService.LoadShops());
         }
 
         [RelayCommand]
@@ -40,7 +44,8 @@ namespace ListSK.Models
                 Unit = Unit,
                 Amount = Amount,
                 IsBought = false,
-                IsOptional = IsOptional
+                IsOptional = IsOptional,
+                Shop = Shop
             };
 
             _mainVM.AddProduct(product);
@@ -50,6 +55,7 @@ namespace ListSK.Models
             Unit = "";
             Amount = "";
             IsOptional = false;
+            Shop = "";
         }
 
         [RelayCommand]
@@ -62,6 +68,17 @@ namespace ListSK.Models
                 Categories.Add(NewCategory);
                 SelectedCategory = NewCategory;
                 NewCategory = string.Empty;
+            }
+        }
+        [RelayCommand]
+        private void AddNewShop()
+        {
+            if (!string.IsNullOrWhiteSpace(NewShop))
+            {
+                ShopService.AddShop(NewShop);
+                Shops.Add(NewShop);
+                Shop = NewShop;
+                NewShop = string.Empty;
             }
         }
     }

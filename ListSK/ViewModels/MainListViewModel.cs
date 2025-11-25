@@ -14,7 +14,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using System.Xml.Serialization;
 using ListSK.Services;
 
 namespace ListSK.ViewModels
@@ -60,6 +59,24 @@ namespace ListSK.ViewModels
         public void ClearList()
         {
             Products.Clear();
+            SaveProducts();
+        }
+        [RelayCommand]
+        private void RemoveCategory(CategoryGroup category)
+        {
+            if (category == null)
+                return;
+            foreach (var product in category.Products.ToList())
+            {
+                Products.Remove(product);
+            }
+            CategoryGroups.Remove(category);
+            var categories = CategoryService.LoadCategories();
+            if (categories.Contains(category.Name))
+            {
+                categories.Remove(category.Name);
+                CategoryService.SaveCategories(categories);
+            }
             SaveProducts();
         }
 
@@ -167,7 +184,8 @@ namespace ListSK.ViewModels
                                 new XElement("Unit", p.Unit ?? string.Empty),
                                 new XElement("Amount", p.Amount ?? string.Empty),
                                 new XElement("IsBought", p.IsBought),
-                                new XElement("IsOptional", p.IsOptional)
+                                new XElement("IsOptional", p.IsOptional),
+                                new XElement("Shop", p.Shop ?? string.Empty)
                             )
                         )
                     )
@@ -203,7 +221,8 @@ namespace ListSK.ViewModels
                         Unit = element.Element("Unit")?.Value ?? string.Empty,
                         Amount = element.Element("Amount")?.Value ?? string.Empty,
                         IsBought = bool.TryParse(element.Element("IsBought")?.Value, out var b) && b,
-                        IsOptional = bool.TryParse(element.Element("IsOptional")?.Value, out var o) && o
+                        IsOptional = bool.TryParse(element.Element("IsOptional")?.Value, out var o) && o,
+                        Shop = element.Element("Shop")?.Value ?? string.Empty
                     };
                     Products.Add(product);
                 }
@@ -230,7 +249,8 @@ namespace ListSK.ViewModels
                                 new XElement("Unit", p.Unit ?? string.Empty),
                                 new XElement("Amount", p.Amount ?? string.Empty),
                                 new XElement("IsBought", p.IsBought),
-                                new XElement("IsOptional", p.IsOptional)
+                                new XElement("IsOptional", p.IsOptional),
+                                new XElement("Shop", p.Shop ?? string.Empty)
                             )
                         )
                     )
@@ -312,7 +332,8 @@ namespace ListSK.ViewModels
                         Unit = e.Element("Unit")?.Value ?? string.Empty,
                         Amount = e.Element("Amount")?.Value ?? string.Empty,
                         IsBought = bool.TryParse(e.Element("IsBought")?.Value, out var b) && b,
-                        IsOptional = bool.TryParse(e.Element("IsOptional")?.Value, out var o) && o
+                        IsOptional = bool.TryParse(e.Element("IsOptional")?.Value, out var o) && o,
+                        Shop = e.Element("Shop")?.Value ?? string.Empty
                     })
                     .ToList();
 
