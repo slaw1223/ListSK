@@ -4,7 +4,7 @@
              xmlns:models="clr-namespace:ListSK.Models"
              xmlns:viewModels="clr-namespace:ListSK.ViewModels"
              x:Class="ListSK.Views.ShopingListView"
-             x:DataType="models:ProductModel"
+             x:DataType="viewModels:ShopingListViewModel"
              >
     <VerticalStackLayout>
         <Picker
@@ -12,5 +12,26 @@
             ItemsSource="{Binding Shops}"
             SelectedItem="{Binding Shop}"
             Margin="10"/>
+        <CollectionView
+            ItemsSource="{Binding GroupedProducts}"
+            IsGrouped="True"
+            SelectionMode="None">
+            <CollectionView.GroupHeaderTemplate>
+                <DataTemplate x:DataType="viewModels:CategoryGroup">
+                    <Grid Padding="8" BackgroundColor="LightGray">
+                        <Label Text="{Binding Name}" FontAttributes="Bold"/>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.GroupHeaderTemplate>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:ProductModel">
+                    <Grid Padding="8" ColumnDefinitions="Auto,*,Auto">
+                        <Label Grid.Column="0" Text="{Binding Amount}" VerticalOptions="Center"/>
+                        <Label Grid.Column="1" Text="{Binding Name}" VerticalOptions="Center"/>
+                        <CheckBox Grid.Column="2" IsChecked="{Binding IsBought, Mode=TwoWay}" VerticalOptions="Center" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
     </VerticalStackLayout>
 </ContentPage>
