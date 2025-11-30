@@ -1,15 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using ListSK.Models;
 using ListSK.Services;
-using System;
-using System.Collections.Generic;
+using Microsoft.Maui.ApplicationModel;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Linq;
-using Microsoft.Maui.ApplicationModel;
-using Microsoft.Maui.Dispatching;
 using System.Diagnostics;
+using System.Linq;
 
 namespace ListSK.ViewModels
 {
@@ -17,73 +14,57 @@ namespace ListSK.ViewModels
     {
         private MainListViewModel _mainVM;
 
-        public ObservableCollection<string> Categories { get; } = new();
         public ObservableCollection<string> Shops { get; } = new();
+
 
         public ObservableCollection<CategoryGroup> GroupedProducts { get; } = new();
 
         [ObservableProperty]
-        private string shop = string.Empty;
+        private string shop = "Wszystkie";
 
-        public ShopingListViewModel(MainListViewModel mainVM = null)
+        public ShopingListViewModel()
         {
-            _mainVM = mainVM;
+            foreach (var s in ShopService.LoadShops() ?? Enumerable.Empty<string>())
+                Shops.Add(s);
 
-            try { foreach (var s in ShopService.LoadShops() ?? Enumerable.Empty<string>()) Shops.Add(s); }
-            catch (Exception ex) { Debug.WriteLine($"ShopService.LoadShops error: {ex}"); }
+            if (!Shops.Contains("Wszystkie"))
+                Shops.Insert(0, "Wszystkie");
+        }
 
-            try { foreach (var c in CategoryService.LoadCategories() ?? Enumerable.Empty<string>()) Categories.Add(c); }
-            catch (Exception ex) { Debug.WriteLine($"CategoryService.LoadCategories error: {ex}"); }
+        public void Attach(MainListViewModel vm)
+        {
+            if (vm == null) return;
 
             if (_mainVM != null)
-                AttachToMainVm(_mainVM);
-
-            RefreshGroups();
-        }
-
-        public void Attach(MainListViewModel mainVm)
-        {
-            if (mainVm == null || ReferenceEquals(mainVm, _mainVM)) return;
-            _mainVM = mainVm;
-            AttachToMainVm(_mainVM);
-            RefreshGroups();
-        }
-
-        private void AttachToMainVm(MainListViewModel vm)
-        {
-            if (vm?.Products == null) return;
-
-            vm.Products.CollectionChanged -= Products_CollectionChanged;
-            vm.Products.CollectionChanged += Products_CollectionChanged;
-
-            foreach (var p in vm.Products)
             {
-                if (p != null)
-                {
-                    p.PropertyChanged -= Product_PropertyChanged;
-                    p.PropertyChanged += Product_PropertyChanged;
-                }
+                _mainVM.Products.CollectionChanged -= ProductsChanged;
+                foreach (var p in _mainVM.Products)
+                    p.PropertyChanged -= ProductChanged;
             }
+
+            _mainVM = vm;
+
+            _mainVM.Products.CollectionChanged += ProductsChanged;
+
+            foreach (var p in _mainVM.Products)
+                p.PropertyChanged += ProductChanged;
+
+            RefreshGroups();
         }
 
-        private void Products_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        private void ProductsChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.NewItems != null)
-            {
                 foreach (ProductModel p in e.NewItems)
-                    if (p != null)
-                        p.PropertyChanged += Product_PropertyChanged;
-            }
+                    p.PropertyChanged += ProductChanged;
+
             if (e.OldItems != null)
-            {
                 foreach (ProductModel p in e.OldItems)
-                    if (p != null)
-                        p.PropertyChanged -= Product_PropertyChanged;
-            }
+                    p.PropertyChanged -= ProductChanged;
+
             RefreshGroups();
         }
-
-        private void Product_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        private void ProductChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (sender is not ProductModel) return;
 
@@ -95,48 +76,41 @@ namespace ListSK.ViewModels
                 RefreshGroups();
             }
         }
-        partial void OnShopChanged(string value)
-        {
-            RefreshGroups();
-        }
+
+        partial void OnShopChanged(string value) => RefreshGroups();
 
         private void RefreshGroups()
         {
-            try
+            if (_mainVM?.Products == null)
             {
-                if (_mainVM?.Products == null)
+                GroupedProducts.Clear();
+                return;
+            }
+
+            var filtered = _mainVM.Products
+                .Where(p => !p.IsBought)
+                .Where(p => Shop == "Wszystkie" ||
+                            string.Equals(p.Shop, Shop, StringComparison.OrdinalIgnoreCase));
+
+            var groups = filtered
+                .GroupBy(p => p.Category ?? "")
+                .OrderBy(g => g.Key)
+                .ToList();
+
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                GroupedProducts.Clear();
+
+                foreach (var g in groups)
                 {
-                    MainThread.BeginInvokeOnMainThread(() => GroupedProducts.Clear());
-                    return;
+                    var grp = new CategoryGroup(g.Key);
+                    foreach (var p in g.OrderBy(p => p.Name))
+                        grp.Products.Add(p);
+
+                    GroupedProducts.Add(grp);
                 }
-
-                var items = _mainVM.Products
-                    .Where(p => p != null)
-                    .Where(p => !p.IsBought)
-                    .Where(p => string.IsNullOrEmpty(Shop) || string.Equals(p.Shop ?? string.Empty, Shop, StringComparison.OrdinalIgnoreCase));
-
-                var groups = items
-                    .GroupBy(p => p.Category ?? string.Empty, StringComparer.OrdinalIgnoreCase)
-                    .OrderBy(g => g.Key, StringComparer.OrdinalIgnoreCase)
-                    .ToList();
-
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    GroupedProducts.Clear();
-                    foreach (var g in groups)
-                    {
-                        var group = new CategoryGroup(g.Key);
-                        foreach (var p in g.OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase))
-                            group.Products.Add(p);
-                        GroupedProducts.Add(group);
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"RefreshGroups error: {ex}");
-                MainThread.BeginInvokeOnMainThread(() => GroupedProducts.Clear());
-            }
+            });
         }
     }
+
 }

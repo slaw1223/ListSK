@@ -15,7 +15,7 @@ namespace ListSK.Services
             var path = Path.Combine(FileSystem.AppDataDirectory, FileName);
 
             if (!File.Exists(path))
-                return new List<string> { "Biedronka", "Lidl", "Selgros", "Żabka" };
+                return new List<string> {"Wszystkie", "Biedronka", "Lidl", "Selgros", "Żabka" };
 
             var doc = XDocument.Load(path);
 
