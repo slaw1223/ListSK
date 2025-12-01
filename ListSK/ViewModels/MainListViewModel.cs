@@ -28,6 +28,14 @@ namespace ListSK.ViewModels
         [ObservableProperty]
         private ObservableCollection<CategoryGroup> categoryGroups = new();
 
+        public ObservableCollection<string> Shops { get; } = new();
+
+
+        public ObservableCollection<CategoryGroup> GroupedProducts { get; } = new();
+
+        [ObservableProperty]
+        private string shop;
+
         public MainListViewModel()
         {
             var categories = CategoryService.LoadCategories();
@@ -35,8 +43,16 @@ namespace ListSK.ViewModels
             {
                 CategoryGroups.Add(new CategoryGroup(category));
             }
+            var shops = ShopService.LoadShops();
+            foreach (var s in shops)
+            {
+                Shops.Add(s);
+            }
+            shop = Shops.FirstOrDefault();
+
             Products.CollectionChanged += Products_CollectionChanged;
             LoadProducts();
+            RefreshGroupedProducts();
         }
 
         public void AddProduct(ProductModel product)
@@ -101,6 +117,7 @@ namespace ListSK.ViewModels
                         g.Products.Remove(item);
                 }
             }
+            RefreshGroupedProducts();
         }
 
         private void Product_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -116,6 +133,7 @@ namespace ListSK.ViewModels
                     group.Products.Add(p);
 
                 SaveProducts();
+                RefreshGroupedProducts();
                 return;
             }
 
@@ -147,9 +165,11 @@ namespace ListSK.ViewModels
                 }
 
                 SaveProducts();
+                RefreshGroupedProducts();
                 return;
             }
             SaveProducts();
+            RefreshGroupedProducts();
         }
         private CategoryGroup GetOrCreateGroup(string category)
         {
@@ -226,6 +246,7 @@ namespace ListSK.ViewModels
                     };
                     Products.Add(product);
                 }
+                RefreshGroupedProducts();
             }
             catch (Exception ex)
             {
@@ -354,12 +375,47 @@ namespace ListSK.ViewModels
                 });
 
                 await Shell.Current.DisplayAlert("OK", $"Dodano {addedCount} elementów. Razem: {Products.Count}.", "OK");
+                RefreshGroupedProducts();
             }
             catch (Exception ex)
             {
                 await Shell.Current.DisplayAlert("Błąd importu", ex.Message, "OK");
             }
         }
+        partial void OnShopChanged(string value)
+        {
+            RefreshGroupedProducts();
+        }
+        private void RefreshGroupedProducts()
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                GroupedProducts.Clear();
 
+                IEnumerable<ProductModel> filtered;
+                if (string.IsNullOrWhiteSpace(Shop) || string.Equals(Shop, "Wszystkie", StringComparison.OrdinalIgnoreCase))
+                {
+                    filtered = Products;
+                }
+                else
+                {
+                    filtered = Products.Where(p => string.Equals(p.Shop ?? string.Empty, Shop, StringComparison.OrdinalIgnoreCase));
+                }
+
+                var grouped = filtered
+                    .GroupBy(p => p.Category ?? string.Empty)
+                    .OrderBy(g => g.Key);
+
+                foreach (var g in grouped)
+                {
+                    var cg = new CategoryGroup(g.Key);
+                    foreach (var p in g.OrderBy(x => x.IsBought).ThenBy(x => x.Name))
+                    {
+                        cg.Products.Add(p);
+                    }
+                    GroupedProducts.Add(cg);
+                }
+            });
+        }
     }
 }

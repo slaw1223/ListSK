@@ -10,7 +10,7 @@
                     SelectionMode="None"
                     ItemsLayout="VerticalList">
         <CollectionView.ItemTemplate>
-            <DataTemplate x:DataType="viewModels:CategoryGroup">
+            <DataTemplate x:DataType="models:CategoryGroup">
                 <Frame Margin="6" Padding="10" HasShadow="False" BorderColor="Transparent">
                     <VerticalStackLayout>
                         <Grid Padding="10">

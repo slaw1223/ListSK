@@ -21,6 +21,7 @@ namespace ListSK
             builder.Services.AddSingleton<ShopingListView>();
             builder.Services.AddSingleton<MainListView>();
             builder.Services.AddTransient<AddPageModel>();
+            builder.Services.AddTransient<ShopingListView>();
 
 #if DEBUG
             builder.Logging.AddDebug();

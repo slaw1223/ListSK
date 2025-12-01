@@ -4,7 +4,7 @@
              xmlns:models="clr-namespace:ListSK.Models"
              xmlns:viewModels="clr-namespace:ListSK.ViewModels"
              x:Class="ListSK.Views.ShopingListView"
-             x:DataType="viewModels:ShopingListViewModel"
+             x:DataType="viewModels:MainListViewModel"
              >
     <VerticalStackLayout>
         <Picker
@@ -17,7 +17,7 @@
             IsGrouped="True"
             SelectionMode="None">
             <CollectionView.GroupHeaderTemplate>
-                <DataTemplate x:DataType="viewModels:CategoryGroup">
+                <DataTemplate x:DataType="models:CategoryGroup">
                     <Grid Padding="8" BackgroundColor="LightGray">
                         <Label Text="{Binding Name}" FontAttributes="Bold"/>
                     </Grid>

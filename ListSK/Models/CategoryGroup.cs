@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ListSK.ViewModels
+namespace ListSK.Models
 {
     public partial class CategoryGroup : ObservableObject
     {
