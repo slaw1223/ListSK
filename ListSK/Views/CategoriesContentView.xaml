@@ -42,7 +42,7 @@
                             </Button>
                         </Grid>
 
-                        <CollectionView ItemsSource="{Binding Products}"
+                        <CollectionView ItemsSource="{Binding}"
                                         IsVisible="{Binding IsExpanded}"
                                         SelectionMode="None"
                                         ItemsLayout="VerticalList">

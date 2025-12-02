@@ -56,12 +56,12 @@
                 <CheckBox Grid.Row="2"
                       IsChecked="{Binding IsOptional}"/>
 
-                <Label Text="Czy jest opcjonalne?"
+                <Label Text="Produkt opcjonalny"
                    Grid.Row="2"
                    Margin="30,20,0,0"/>
 
                 <Picker x:Name="shop"
-                    Title="Wybierz sklep (opcjonelne)"
+                    Title="Wybierz sklep"
                     SelectedItem="{Binding Shop}"
                     ItemsSource="{Binding Shops}"
                     Grid.Row="2"

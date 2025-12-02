@@ -6,6 +6,7 @@
              x:Class="ListSK.Views.ShopingListView"
              x:DataType="viewModels:MainListViewModel"
              >
+    
     <VerticalStackLayout>
         <Picker
             Title="Wybierz sklep"
@@ -16,13 +17,24 @@
             ItemsSource="{Binding GroupedProducts}"
             IsGrouped="True"
             SelectionMode="None">
+            
+            <CollectionView.Triggers>
+                <DataTrigger TargetType="CollectionView"
+                  x:DataType="models:ProductModel"
+                 Binding="{Binding IsBought}"
+                 Value="True">
+                    <Setter Property="IsVisible" Value="False"/>
+                </DataTrigger>
+            </CollectionView.Triggers>
+
             <CollectionView.GroupHeaderTemplate>
                 <DataTemplate x:DataType="models:CategoryGroup">
-                    <Grid Padding="8" BackgroundColor="LightGray">
+                    <Grid Padding="8" BackgroundColor="Blue" >
                         <Label Text="{Binding Name}" FontAttributes="Bold"/>
                     </Grid>
                 </DataTemplate>
             </CollectionView.GroupHeaderTemplate>
+
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:ProductModel">
                     <Grid Padding="8" ColumnDefinitions="Auto,*,Auto">
@@ -32,6 +44,7 @@
                     </Grid>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
+
         </CollectionView>
     </VerticalStackLayout>
 </ContentPage>

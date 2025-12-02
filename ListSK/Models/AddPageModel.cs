@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using ListSK.Services;
 using System.Threading.Tasks;
+using Microsoft.Maui.ApplicationModel;
 
 namespace ListSK.Models
 {
@@ -37,25 +38,40 @@ namespace ListSK.Models
         [RelayCommand]
         private void AddProduct()
         {
+            if (string.IsNullOrWhiteSpace(Name))
+                return;
+
+            var chosenCategory = !string.IsNullOrWhiteSpace(SelectedCategory) ? SelectedCategory : Category ?? string.Empty;
+
             var product = new ProductModel
             {
-                Name = Name,
-                Category = Category,
-                Unit = Unit,
-                Amount = Amount,
+                Name = Name.Trim(),
+                Category = chosenCategory,
+                Unit = Unit ?? string.Empty,
+                Amount = Amount ?? string.Empty,
                 IsBought = false,
                 IsOptional = IsOptional,
-                Shop = Shop
+                Shop = Shop ?? string.Empty
             };
 
-            _mainVM.AddProduct(product);
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                try
+                {
+                    _mainVM.AddProduct(product);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Błąd podczas dodawania produktu: {ex}");
+                }
+            });
 
-            Name = "";
-            Category = "";
-            Unit = "";
-            Amount = "";
+            Name = string.Empty;
+            Category = string.Empty;
+            Unit = string.Empty;
+            Amount = string.Empty;
             IsOptional = false;
-            Shop = "";
+            Shop = string.Empty;
         }
 
         [RelayCommand]

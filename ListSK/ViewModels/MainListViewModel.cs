@@ -30,7 +30,6 @@ namespace ListSK.ViewModels
 
         public ObservableCollection<string> Shops { get; } = new();
 
-
         public ObservableCollection<CategoryGroup> GroupedProducts { get; } = new();
 
         [ObservableProperty]
@@ -57,10 +56,7 @@ namespace ListSK.ViewModels
 
         public void AddProduct(ProductModel product)
         {
-            if (product == null)
-            {
-                return;
-            }
+            if (product == null) return;
             Products.Add(product);
             SaveProducts();
         }
@@ -71,22 +67,26 @@ namespace ListSK.ViewModels
             Products.Remove(product);
             SaveProducts();
         }
+
         [RelayCommand]
         public void ClearList()
         {
             Products.Clear();
             SaveProducts();
         }
+
         [RelayCommand]
         private void RemoveCategory(CategoryGroup category)
         {
-            if (category == null)
-                return;
-            foreach (var product in category.Products.ToList())
+            if (category == null) return;
+
+            foreach (var product in category.ToList())
             {
                 Products.Remove(product);
             }
+
             CategoryGroups.Remove(category);
+
             var categories = CategoryService.LoadCategories();
             if (categories.Contains(category.Name))
             {
@@ -98,39 +98,87 @@ namespace ListSK.ViewModels
 
         private void Products_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (e.NewItems != null)
+            // Obsłuż konkretne akcje — nie traktuj Move jako Remove+Add
+            if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems != null)
             {
                 foreach (ProductModel item in e.NewItems)
                 {
+                    // zabezpiecz przed podwójną subskrypcją
+                    item.PropertyChanged -= Product_PropertyChanged;
                     item.PropertyChanged += Product_PropertyChanged;
+
                     var group = GetOrCreateGroup(item.Category);
-                    if (!group.Products.Contains(item))
-                        group.Products.Add(item);
+                    if (!group.Contains(item))
+                        group.Add(item);
                 }
             }
-            if (e.OldItems != null)
+            else if (e.Action == NotifyCollectionChangedAction.Remove && e.OldItems != null)
             {
                 foreach (ProductModel item in e.OldItems)
                 {
                     item.PropertyChanged -= Product_PropertyChanged;
                     foreach (var g in CategoryGroups)
-                        g.Products.Remove(item);
+                        if (g.Contains(item))
+                            g.Remove(item);
                 }
             }
+            else if (e.Action == NotifyCollectionChangedAction.Replace)
+            {
+                // traktuj Replace jako Remove + Add
+                if (e.OldItems != null)
+                {
+                    foreach (ProductModel item in e.OldItems)
+                    {
+                        item.PropertyChanged -= Product_PropertyChanged;
+                        foreach (var g in CategoryGroups)
+                            if (g.Contains(item))
+                                g.Remove(item);
+                    }
+                }
+                if (e.NewItems != null)
+                {
+                    foreach (ProductModel item in e.NewItems)
+                    {
+                        item.PropertyChanged -= Product_PropertyChanged;
+                        item.PropertyChanged += Product_PropertyChanged;
+                        var group = GetOrCreateGroup(item.Category);
+                        if (!group.Contains(item))
+                            group.Add(item);
+                    }
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Reset)
+            {
+                // Pełne wyczyszczenie — od-subskrybuj wszystkie i oczyść grupy
+                foreach (var g in CategoryGroups)
+                    g.Clear();
+                foreach (var item in Products)
+                {
+                    item.PropertyChanged -= Product_PropertyChanged;
+                    item.PropertyChanged += Product_PropertyChanged;
+                    var group = GetOrCreateGroup(item.Category);
+                    if (!group.Contains(item))
+                        group.Add(item);
+                }
+            }
+            // IGNORUJ Move — zmiany pozycji obsługiwane są przez Product_PropertyChanged bez powodowania Remove/Add tutaj
+
             RefreshGroupedProducts();
         }
 
         private void Product_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (sender is not ProductModel p) return;
+
             if (e.PropertyName == nameof(ProductModel.Category))
             {
                 foreach (var g in CategoryGroups)
-                    g.Products.Remove(p);
+                    if (g.Contains(p))
+                        g.Remove(p);
 
                 var group = GetOrCreateGroup(p.Category);
-                if (!group.Products.Contains(p))
-                    group.Products.Add(p);
+                if (!group.Contains(p))
+                    group.Add(p);
 
                 SaveProducts();
                 RefreshGroupedProducts();
@@ -139,38 +187,55 @@ namespace ListSK.ViewModels
 
             if (e.PropertyName == nameof(ProductModel.IsBought))
             {
-
-                var sorted = Products.OrderBy(x => x.IsBought).ToList();
-
-                MainThread.BeginInvokeOnMainThread(() =>
+                try
                 {
-                    Products.CollectionChanged -= Products_CollectionChanged;
-                    Products.Clear();
-                    foreach (var it in sorted)
-                        Products.Add(it);
-                    Products.CollectionChanged += Products_CollectionChanged;
-                });
+                    // Wylicz docelowe indeksy
+                    var sorted = Products.OrderBy(x => x.IsBought).ThenBy(x => x.Name).ToList();
+                    var newIndex = sorted.IndexOf(p);
+                    var oldIndex = Products.IndexOf(p);
 
-                var group = CategoryGroups.FirstOrDefault(g => string.Equals(g.Name, p.Category, StringComparison.OrdinalIgnoreCase));
-                if (group != null)
-                {
-                    MainThread.BeginInvokeOnMainThread(() =>
+                    if (oldIndex >= 0 && newIndex >= 0 && oldIndex != newIndex)
                     {
-                        if (group.Products.Contains(p))
+                        // Tymczasowo wyłącz handler, aby Move nie był traktowany jako Remove+Add
+                        Products.CollectionChanged -= Products_CollectionChanged;
+                        try
                         {
-                            group.Products.Remove(p);
-                            group.Products.Add(p);
+                            Products.Move(oldIndex, newIndex);
                         }
-                    });
+                        finally
+                        {
+                            Products.CollectionChanged += Products_CollectionChanged;
+                        }
+                    }
+
+                    // Zaktualizuj pozycję w grupie (jeśli istnieje)
+                    var group = CategoryGroups.FirstOrDefault(g => string.Equals(g.Name, p.Category, StringComparison.OrdinalIgnoreCase));
+                    if (group != null && group.Contains(p))
+                    {
+                        var sortedGroup = group.OrderBy(x => x.IsBought).ThenBy(x => x.Name).ToList();
+                        var newGroupIndex = sortedGroup.IndexOf(p);
+                        var oldGroupIndex = group.IndexOf(p);
+                        if (oldGroupIndex >= 0 && newGroupIndex >= 0 && oldGroupIndex != newGroupIndex)
+                        {
+                            group.Move(oldGroupIndex, newGroupIndex);
+                        }
+                    }
+
+                    SaveProducts();
+                    RefreshGroupedProducts();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Błąd przy przestawianiu elementu: {ex}");
                 }
 
-                SaveProducts();
-                RefreshGroupedProducts();
                 return;
             }
+
             SaveProducts();
             RefreshGroupedProducts();
         }
+
         private CategoryGroup GetOrCreateGroup(string category)
         {
             var name = category ?? string.Empty;
@@ -215,7 +280,7 @@ namespace ListSK.ViewModels
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd zapisy: {ex}");
+                Debug.WriteLine($"Błąd zapisu: {ex}");
             }
         }
 
@@ -224,10 +289,8 @@ namespace ListSK.ViewModels
             try
             {
                 var path = Path.Combine(FileSystem.AppDataDirectory, FileName);
-                if (!File.Exists(path))
-                {
-                    return;
-                }
+                if (!File.Exists(path)) return;
+
                 var doc = XDocument.Load(path);
 
                 Products.Clear();
@@ -250,7 +313,7 @@ namespace ListSK.ViewModels
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd ładowania: {ex}");
+                Debug.WriteLine($"Błąd ładowania: {ex}");
             }
         }
 
@@ -278,7 +341,6 @@ namespace ListSK.ViewModels
                 );
 
                 doc.Save(path);
-
                 var open = await Shell.Current.DisplayAlert(
                     "Zapisano",
                     $"Plik zapisano w:\n{path}",
@@ -288,18 +350,18 @@ namespace ListSK.ViewModels
                 if (open)
                 {
 #if WINDOWS
-            try
-            {
-                var psi = new ProcessStartInfo("notepad.exe", $"\"{path}\"")
-                {
-                    UseShellExecute = true
-                };
-                Process.Start(psi);
-            }
-            catch
-            {
-                await Launcher.OpenAsync(new OpenFileRequest { File = new ReadOnlyFile(path) });
-            }
+                    try
+                    {
+                        var psi = new ProcessStartInfo("notepad.exe", $"\"{path}\"")
+                        {
+                            UseShellExecute = true
+                        };
+                        Process.Start(psi);
+                    }
+                    catch
+                    {
+                        await Launcher.OpenAsync(new OpenFileRequest { File = new ReadOnlyFile(path) });
+                    }
 #else
                     await Launcher.OpenAsync(new OpenFileRequest { File = new ReadOnlyFile(path) });
 #endif
@@ -317,9 +379,9 @@ namespace ListSK.ViewModels
             var customFileTypes = new FilePickerFileType(
                 new Dictionary<DevicePlatform, IEnumerable<string>>
                 {
-            { DevicePlatform.Android, new[] { "application/xml", "text/xml" } },
-            { DevicePlatform.iOS, new[] { "public.xml" } },
-            { DevicePlatform.WinUI, new[] { ".xml" } },
+                    { DevicePlatform.Android, new[] { "application/xml", "text/xml" } },
+                    { DevicePlatform.iOS, new[] { "public.xml" } },
+                    { DevicePlatform.WinUI, new[] { ".xml" } },
                 }
             );
 
@@ -331,8 +393,7 @@ namespace ListSK.ViewModels
                     FileTypes = customFileTypes
                 });
 
-                if (result == null)
-                    return;
+                if (result == null) return;
 
                 using var stream = await result.OpenReadAsync();
                 var doc = XDocument.Load(stream);
@@ -382,40 +443,84 @@ namespace ListSK.ViewModels
                 await Shell.Current.DisplayAlert("Błąd importu", ex.Message, "OK");
             }
         }
+
         partial void OnShopChanged(string value)
         {
             RefreshGroupedProducts();
         }
+
         private void RefreshGroupedProducts()
         {
-            //MainThread.BeginInvokeOnMainThread(() =>
-            //{
-                //GroupedProducts.Clear();
-
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                // przygotuj dane
                 IEnumerable<ProductModel> filtered;
-                if (string.IsNullOrWhiteSpace(Shop) || string.Equals(Shop, "Wszystkie", StringComparison.OrdinalIgnoreCase))
-                {
+                if (string.IsNullOrWhiteSpace(Shop) || string.Equals(Shop, "Wszystkie"))
                     filtered = Products;
-                }
                 else
-                {
-                    filtered = Products.Where(p => string.Equals(p.Shop ?? string.Empty, Shop, StringComparison.OrdinalIgnoreCase));
-                }
+                    filtered = Products.Where(p => string.Equals(p.Shop, Shop));
 
                 var grouped = filtered
                     .GroupBy(p => p.Category ?? string.Empty)
-                    .OrderBy(g => g.Key);
+                    .OrderBy(g => g.Key)
+                    .ToList();
 
-                foreach (var g in grouped)
+                // Usuń grupy których nie ma już w danych
+                var wantedGroupNames = new HashSet<string>(grouped.Select(g => g.Key));
+                for (int i = GroupedProducts.Count - 1; i >= 0; i--)
                 {
-                    var cg = new CategoryGroup(g.Key);
-                    foreach (var p in g.OrderBy(x => x.IsBought).ThenBy(x => x.Name))
-                    {
-                        cg.Products.Add(p);
-                    }
-                    GroupedProducts.Add(cg);
+                    if (!wantedGroupNames.Contains(GroupedProducts[i].Name))
+                        GroupedProducts.RemoveAt(i);
                 }
-            //});
+
+                // Synchronizuj/utwórz/ustaw kolejność grup i elementów w grupach
+                for (int targetGroupIndex = 0; targetGroupIndex < grouped.Count; targetGroupIndex++)
+                {
+                    var g = grouped[targetGroupIndex];
+                    var groupName = g.Key;
+
+                    var existingGroup = GroupedProducts.FirstOrDefault(x => string.Equals(x.Name, groupName, StringComparison.OrdinalIgnoreCase));
+                    if (existingGroup == null)
+                    {
+                        existingGroup = new CategoryGroup(groupName);
+                        GroupedProducts.Insert(targetGroupIndex, existingGroup);
+                    }
+                    else
+                    {
+                        var currentIndex = GroupedProducts.IndexOf(existingGroup);
+                        if (currentIndex != targetGroupIndex)
+                            GroupedProducts.Move(currentIndex, targetGroupIndex);
+                    }
+
+                    // uporządkuj elementy wewnątrz grupy zgodnie z regułą: IsBought, potem Name
+                    var desiredItems = g.OrderBy(x => x.IsBought).ThenBy(x => x.Name).ToList();
+
+                    // usuń nadmiarowe elementy
+                    for (int i = existingGroup.Count - 1; i >= 0; i--)
+                    {
+                        if (!desiredItems.Contains(existingGroup[i]))
+                            existingGroup.RemoveAt(i);
+                    }
+
+                    // wstaw/porządkuj elementy
+                    for (int i = 0; i < desiredItems.Count; i++)
+                    {
+                        var item = desiredItems[i];
+                        var curIdx = existingGroup.IndexOf(item);
+                        if (curIdx == -1)
+                        {
+                            existingGroup.Insert(i, item);
+                        }
+                        else if (curIdx != i)
+                        {
+                            existingGroup.Move(curIdx, i);
+                        }
+                    }
+
+                    // odśwież licznik (jeśli potrzebne)
+                    existingGroup.OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs(nameof(existingGroup.ProductCount)));
+                }
+            });
         }
     }
 }

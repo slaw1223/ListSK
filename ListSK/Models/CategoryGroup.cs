@@ -1,37 +1,44 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using ListSK.Models;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel;
+using System.Diagnostics.Contracts;
 
 namespace ListSK.Models
 {
-    public partial class CategoryGroup : ObservableObject
+    // Grupa teraz jest kolekcją produktów — to natywne i bezpieczne dla CollectionView.IsGrouped="True"
+    public partial class CategoryGroup : ObservableCollection<ProductModel>, INotifyPropertyChanged
     {
         public string Name { get; }
 
-        public ObservableCollection<ProductModel> Products { get; } = new();
+        public int ProductCount => Count;
 
-        public int ProductCount => Products.Count;
-
-        [ObservableProperty]
-        private bool isExpanded;
+        private bool _isExpanded;
+        public bool IsExpanded
+        {
+            get => _isExpanded;
+            set
+            {
+                if (_isExpanded == value) return;
+                _isExpanded = value;
+                OnPropertyChanged(new PropertyChangedEventArgs(nameof(IsExpanded)));
+            }
+        }
 
         public CategoryGroup(string name)
         {
             Name = name;
-            Products.CollectionChanged += Products_CollectionChanged;
+            CollectionChanged += Products_CollectionChanged;
         }
 
         private void Products_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            OnPropertyChanged(nameof(ProductCount));
+            OnPropertyChanged(new PropertyChangedEventArgs(nameof(ProductCount)));
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void OnPropertyChanged(PropertyChangedEventArgs e) => PropertyChanged?.Invoke(this, e);
 
         [RelayCommand]
         private void Toggle()
