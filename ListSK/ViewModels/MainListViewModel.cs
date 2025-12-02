@@ -388,9 +388,9 @@ namespace ListSK.ViewModels
         }
         private void RefreshGroupedProducts()
         {
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                GroupedProducts.Clear();
+            //MainThread.BeginInvokeOnMainThread(() =>
+            //{
+                //GroupedProducts.Clear();
 
                 IEnumerable<ProductModel> filtered;
                 if (string.IsNullOrWhiteSpace(Shop) || string.Equals(Shop, "Wszystkie", StringComparison.OrdinalIgnoreCase))
@@ -415,7 +415,7 @@ namespace ListSK.ViewModels
                     }
                     GroupedProducts.Add(cg);
                 }
-            });
+            //});
         }
     }
 }
