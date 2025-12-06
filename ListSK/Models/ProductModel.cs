@@ -13,7 +13,7 @@ namespace ListSK.Models
         [ObservableProperty] private string name;
         [ObservableProperty] private string category;
         [ObservableProperty] private string unit;
-        [ObservableProperty] private string amount;
+        [ObservableProperty] private double amount;
         [ObservableProperty] private bool isBought;
         [ObservableProperty] private bool isOptional;
         [ObservableProperty] private string shop;

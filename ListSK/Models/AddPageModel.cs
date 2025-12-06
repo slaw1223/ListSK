@@ -38,20 +38,48 @@ namespace ListSK.Models
         [RelayCommand]
         private void AddProduct()
         {
+            var chosenCategory;
+            var chosenShop;
+            var chosenUnit;
             if (string.IsNullOrWhiteSpace(Name))
                 return;
+            if (string.IsNullOrWhiteSpace(Amount))
+                return;
 
-            var chosenCategory = !string.IsNullOrWhiteSpace(SelectedCategory) ? SelectedCategory : Category ?? string.Empty;
+            if(string.IsNullOrWhiteSpace(SelectedCategory))
+            {
+                chosenCategory = "Warzywa";
+            }
+            else 
+            {
+                chosenCategory = SelectedCategory;
+            }
+            if (string.IsNullOrWhiteSpace(Shop))
+            {
+                chosenShop = "Wszystkie";
+            }else
+            {
+                chosenShop = Shop;
+            }
+            if (string.IsNullOrWhiteSpace(Unit))
+            {
+                chosenUnit = "szt";
+            }
+            else
+            {
+                chosenUnit = Unit;
+            }
+
 
             var product = new ProductModel
             {
                 Name = Name.Trim(),
                 Category = chosenCategory,
                 Unit = Unit ?? string.Empty,
-                Amount = Amount ?? string.Empty,
+                Amount = double.Parse(Amount),
                 IsBought = false,
                 IsOptional = IsOptional,
-                Shop = Shop ?? string.Empty
+                Shop = chosenShop
             };
 
             MainThread.BeginInvokeOnMainThread(() =>

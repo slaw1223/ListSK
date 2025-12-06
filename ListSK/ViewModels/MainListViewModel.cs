@@ -74,6 +74,17 @@ namespace ListSK.ViewModels
             Products.Clear();
             SaveProducts();
         }
+        [RelayCommand]
+        public void Increment(ProductModel product)
+        {
+            product.Amount += 1;
+        }
+
+        [RelayCommand]
+        public void Decrement(ProductModel product)
+        {
+            product.Amount += -1;
+        }
 
         [RelayCommand]
         private void RemoveCategory(CategoryGroup category)
@@ -98,12 +109,10 @@ namespace ListSK.ViewModels
 
         private void Products_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            // Obsłuż konkretne akcje — nie traktuj Move jako Remove+Add
             if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems != null)
             {
                 foreach (ProductModel item in e.NewItems)
                 {
-                    // zabezpiecz przed podwójną subskrypcją
                     item.PropertyChanged -= Product_PropertyChanged;
                     item.PropertyChanged += Product_PropertyChanged;
 
@@ -124,7 +133,6 @@ namespace ListSK.ViewModels
             }
             else if (e.Action == NotifyCollectionChangedAction.Replace)
             {
-                // traktuj Replace jako Remove + Add
                 if (e.OldItems != null)
                 {
                     foreach (ProductModel item in e.OldItems)
@@ -149,7 +157,6 @@ namespace ListSK.ViewModels
             }
             else if (e.Action == NotifyCollectionChangedAction.Reset)
             {
-                // Pełne wyczyszczenie — od-subskrybuj wszystkie i oczyść grupy
                 foreach (var g in CategoryGroups)
                     g.Clear();
                 foreach (var item in Products)
@@ -161,7 +168,6 @@ namespace ListSK.ViewModels
                         group.Add(item);
                 }
             }
-            // IGNORUJ Move — zmiany pozycji obsługiwane są przez Product_PropertyChanged bez powodowania Remove/Add tutaj
 
             RefreshGroupedProducts();
         }
@@ -189,14 +195,12 @@ namespace ListSK.ViewModels
             {
                 try
                 {
-                    // Wylicz docelowe indeksy
                     var sorted = Products.OrderBy(x => x.IsBought).ThenBy(x => x.Name).ToList();
                     var newIndex = sorted.IndexOf(p);
                     var oldIndex = Products.IndexOf(p);
 
                     if (oldIndex >= 0 && newIndex >= 0 && oldIndex != newIndex)
                     {
-                        // Tymczasowo wyłącz handler, aby Move nie był traktowany jako Remove+Add
                         Products.CollectionChanged -= Products_CollectionChanged;
                         try
                         {
@@ -208,7 +212,6 @@ namespace ListSK.ViewModels
                         }
                     }
 
-                    // Zaktualizuj pozycję w grupie (jeśli istnieje)
                     var group = CategoryGroups.FirstOrDefault(g => string.Equals(g.Name, p.Category, StringComparison.OrdinalIgnoreCase));
                     if (group != null && group.Contains(p))
                     {
@@ -267,7 +270,7 @@ namespace ListSK.ViewModels
                                 new XElement("Name", p.Name ?? string.Empty),
                                 new XElement("Category", p.Category ?? string.Empty),
                                 new XElement("Unit", p.Unit ?? string.Empty),
-                                new XElement("Amount", p.Amount ?? string.Empty),
+                                new XElement("Amount", p.Amount),
                                 new XElement("IsBought", p.IsBought),
                                 new XElement("IsOptional", p.IsOptional),
                                 new XElement("Shop", p.Shop ?? string.Empty)
@@ -302,7 +305,7 @@ namespace ListSK.ViewModels
                         Name = element.Element("Name")?.Value ?? string.Empty,
                         Category = element.Element("Category")?.Value ?? string.Empty,
                         Unit = element.Element("Unit")?.Value ?? string.Empty,
-                        Amount = element.Element("Amount")?.Value ?? string.Empty,
+                        Amount = double.Parse(element.Element("Amount")?.Value ?? string.Empty),
                         IsBought = bool.TryParse(element.Element("IsBought")?.Value, out var b) && b,
                         IsOptional = bool.TryParse(element.Element("IsOptional")?.Value, out var o) && o,
                         Shop = element.Element("Shop")?.Value ?? string.Empty
@@ -331,7 +334,7 @@ namespace ListSK.ViewModels
                                 new XElement("Name", p.Name ?? string.Empty),
                                 new XElement("Category", p.Category ?? string.Empty),
                                 new XElement("Unit", p.Unit ?? string.Empty),
-                                new XElement("Amount", p.Amount ?? string.Empty),
+                                new XElement("Amount", p.Amount),
                                 new XElement("IsBought", p.IsBought),
                                 new XElement("IsOptional", p.IsOptional),
                                 new XElement("Shop", p.Shop ?? string.Empty)
@@ -412,7 +415,7 @@ namespace ListSK.ViewModels
                         Name = e.Element("Name")?.Value ?? string.Empty,
                         Category = e.Element("Category")?.Value ?? string.Empty,
                         Unit = e.Element("Unit")?.Value ?? string.Empty,
-                        Amount = e.Element("Amount")?.Value ?? string.Empty,
+                        Amount = double.Parse(e.Element("Amount")?.Value ?? string.Empty),
                         IsBought = bool.TryParse(e.Element("IsBought")?.Value, out var b) && b,
                         IsOptional = bool.TryParse(e.Element("IsOptional")?.Value, out var o) && o,
                         Shop = e.Element("Shop")?.Value ?? string.Empty
@@ -453,27 +456,23 @@ namespace ListSK.ViewModels
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                // przygotuj dane
                 IEnumerable<ProductModel> filtered;
                 if (string.IsNullOrWhiteSpace(Shop) || string.Equals(Shop, "Wszystkie"))
-                    filtered = Products;
+                    filtered = Products.Where(p => !p.IsBought);
                 else
-                    filtered = Products.Where(p => string.Equals(p.Shop, Shop));
+                    filtered = Products.Where(p => string.Equals(p.Shop, Shop) && !p.IsBought);
 
                 var grouped = filtered
                     .GroupBy(p => p.Category ?? string.Empty)
                     .OrderBy(g => g.Key)
                     .ToList();
 
-                // Usuń grupy których nie ma już w danych
                 var wantedGroupNames = new HashSet<string>(grouped.Select(g => g.Key));
                 for (int i = GroupedProducts.Count - 1; i >= 0; i--)
                 {
                     if (!wantedGroupNames.Contains(GroupedProducts[i].Name))
                         GroupedProducts.RemoveAt(i);
                 }
-
-                // Synchronizuj/utwórz/ustaw kolejność grup i elementów w grupach
                 for (int targetGroupIndex = 0; targetGroupIndex < grouped.Count; targetGroupIndex++)
                 {
                     var g = grouped[targetGroupIndex];
@@ -492,24 +491,22 @@ namespace ListSK.ViewModels
                             GroupedProducts.Move(currentIndex, targetGroupIndex);
                     }
 
-                    // uporządkuj elementy wewnątrz grupy zgodnie z regułą: IsBought, potem Name
-                    var desiredItems = g.OrderBy(x => x.IsBought).ThenBy(x => x.Name).ToList();
+                    var desiredItems = g.OrderBy(x => x.Category).ThenBy(x => x.Name).ToList();
 
-                    // usuń nadmiarowe elementy
                     for (int i = existingGroup.Count - 1; i >= 0; i--)
                     {
                         if (!desiredItems.Contains(existingGroup[i]))
                             existingGroup.RemoveAt(i);
                     }
 
-                    // wstaw/porządkuj elementy
                     for (int i = 0; i < desiredItems.Count; i++)
                     {
                         var item = desiredItems[i];
                         var curIdx = existingGroup.IndexOf(item);
                         if (curIdx == -1)
                         {
-                            existingGroup.Insert(i, item);
+                                existingGroup.Insert(i, item);
+                            
                         }
                         else if (curIdx != i)
                         {
@@ -517,7 +514,6 @@ namespace ListSK.ViewModels
                         }
                     }
 
-                    // odśwież licznik (jeśli potrzebne)
                     existingGroup.OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs(nameof(existingGroup.ProductCount)));
                 }
             });

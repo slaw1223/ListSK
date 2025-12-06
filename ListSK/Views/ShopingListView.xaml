@@ -6,45 +6,47 @@
              x:Class="ListSK.Views.ShopingListView"
              x:DataType="viewModels:MainListViewModel"
              >
-    
-    <VerticalStackLayout>
-        <Picker
+    <ScrollView>
+        <VerticalStackLayout>
+
+            <Picker
             Title="Wybierz sklep"
             ItemsSource="{Binding Shops}"
             SelectedItem="{Binding Shop}"
             Margin="10"/>
-        <CollectionView
+            <CollectionView
             ItemsSource="{Binding GroupedProducts}"
             IsGrouped="True"
             SelectionMode="None">
-            
-            <CollectionView.Triggers>
-                <DataTrigger TargetType="CollectionView"
-                  x:DataType="models:ProductModel"
-                 Binding="{Binding IsBought}"
-                 Value="True">
-                    <Setter Property="IsVisible" Value="False"/>
-                </DataTrigger>
-            </CollectionView.Triggers>
 
-            <CollectionView.GroupHeaderTemplate>
-                <DataTemplate x:DataType="models:CategoryGroup">
-                    <Grid Padding="8" BackgroundColor="Blue" >
-                        <Label Text="{Binding Name}" FontAttributes="Bold"/>
-                    </Grid>
-                </DataTemplate>
-            </CollectionView.GroupHeaderTemplate>
+                <CollectionView.GroupHeaderTemplate>
+                    <DataTemplate x:DataType="models:CategoryGroup">
+                        <Grid Padding="8" BackgroundColor="DarkBlue" >
+                            <Label Text="{Binding Name}" FontAttributes="Bold"/>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.GroupHeaderTemplate>
 
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="models:ProductModel">
-                    <Grid Padding="8" ColumnDefinitions="Auto,*,Auto">
-                        <Label Grid.Column="0" Text="{Binding Amount}" VerticalOptions="Center"/>
-                        <Label Grid.Column="1" Text="{Binding Name}" VerticalOptions="Center"/>
-                        <CheckBox Grid.Column="2" IsChecked="{Binding IsBought, Mode=TwoWay}" VerticalOptions="Center" />
-                    </Grid>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:ProductModel">
+                        <Grid Padding="8" ColumnDefinitions="Auto,Auto,Auto,Auto" Margin="5">
+                            <Grid.Triggers>
+                                <DataTrigger TargetType="Grid"
+                                             Binding="{Binding IsOptional}"
+                                             Value="True">
+                                    <Setter Property="BackgroundColor" Value="Red"/>
+                                </DataTrigger>
+                            </Grid.Triggers>
+                            <CheckBox Grid.Column="0" IsChecked="{Binding IsBought, Mode=TwoWay}" VerticalOptions="Center" />
+                            <Label Grid.Column="1" Text="{Binding Name}" VerticalOptions="Center"/>
+                            <Label Grid.Column="2" Text="{Binding Amount}" Margin="15,0,0,0" VerticalOptions="Center"/>
+                            <Label Grid.Column="3" Text="{Binding Unit}" Margin="5,0" VerticalOptions="Center"/>
+                            
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
 
-        </CollectionView>
-    </VerticalStackLayout>
+            </CollectionView>
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

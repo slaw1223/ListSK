@@ -7,7 +7,6 @@ using System.Diagnostics.Contracts;
 
 namespace ListSK.Models
 {
-    // Grupa teraz jest kolekcją produktów — to natywne i bezpieczne dla CollectionView.IsGrouped="True"
     public partial class CategoryGroup : ObservableCollection<ProductModel>, INotifyPropertyChanged
     {
         public string Name { get; }

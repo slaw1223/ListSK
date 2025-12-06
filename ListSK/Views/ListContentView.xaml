@@ -34,6 +34,9 @@
             <Label Text="{Binding Category}" Grid.Column="4" FontSize="Medium" VerticalOptions="Center"/>
             <Label Text="{Binding Shop}" Grid.Column="1" Grid.Row="1" FontSize="Small" VerticalOptions="Center"/>
 
+            <Button Text="-" Grid.Column="2" Grid.Row="1" VerticalOptions="Center" WidthRequest="10" HeightRequest="10" Command="{Binding Path=BindingContext.DecrementCommand,Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding}"/>
+            <Button Text="+" Grid.Column="3" Grid.Row="1" VerticalOptions="Center" WidthRequest="10" HeightRequest="10" Command="{Binding Path=BindingContext.IncrementCommand,Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding}"/>
+            
             <FlyoutBase.ContextFlyout>
                 <MenuFlyout>
                     <MenuFlyoutItem Text="Usuń produkt"
