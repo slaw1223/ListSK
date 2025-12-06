@@ -36,7 +36,9 @@
 
             <Button Text="-" Grid.Column="2" Grid.Row="1" VerticalOptions="Center" WidthRequest="10" HeightRequest="10" Command="{Binding Path=BindingContext.DecrementCommand,Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding}"/>
             <Button Text="+" Grid.Column="3" Grid.Row="1" VerticalOptions="Center" WidthRequest="10" HeightRequest="10" Command="{Binding Path=BindingContext.IncrementCommand,Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding}"/>
-            
+            <Label Text="Produkt opcjonalny" Grid.Column="4" Grid.Row="1" VerticalOptions="Center" IsVisible="{Binding IsOptional}">
+            </Label>
+
             <FlyoutBase.ContextFlyout>
                 <MenuFlyout>
                     <MenuFlyoutItem Text="Usuń produkt"

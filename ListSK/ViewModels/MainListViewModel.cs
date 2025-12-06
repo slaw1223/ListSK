@@ -223,7 +223,6 @@ namespace ListSK.ViewModels
                             group.Move(oldGroupIndex, newGroupIndex);
                         }
                     }
-
                     SaveProducts();
                     RefreshGroupedProducts();
                 }
@@ -231,7 +230,6 @@ namespace ListSK.ViewModels
                 {
                     Debug.WriteLine($"Błąd przy przestawianiu elementu: {ex}");
                 }
-
                 return;
             }
 
@@ -352,22 +350,14 @@ namespace ListSK.ViewModels
 
                 if (open)
                 {
-#if WINDOWS
                     try
-                    {
-                        var psi = new ProcessStartInfo("notepad.exe", $"\"{path}\"")
-                        {
-                            UseShellExecute = true
-                        };
-                        Process.Start(psi);
-                    }
-                    catch
                     {
                         await Launcher.OpenAsync(new OpenFileRequest { File = new ReadOnlyFile(path) });
                     }
-#else
-                    await Launcher.OpenAsync(new OpenFileRequest { File = new ReadOnlyFile(path) });
-#endif
+                    catch (Exception ex)
+                    {
+                        await Shell.Current.DisplayAlert("Błąd", $"Nie można otworzyć pliku: {ex.Message}", "OK");
+                    }
                 }
             }
             catch (Exception ex)
@@ -513,7 +503,6 @@ namespace ListSK.ViewModels
                             existingGroup.Move(curIdx, i);
                         }
                     }
-
                     existingGroup.OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs(nameof(existingGroup.ProductCount)));
                 }
             });

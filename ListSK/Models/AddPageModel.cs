@@ -1,14 +1,15 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using ListSK.Services;
 using ListSK.ViewModels;
+using Microsoft.Maui.ApplicationModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Text;
-using ListSK.Services;
 using System.Threading.Tasks;
-using Microsoft.Maui.ApplicationModel;
 
 namespace ListSK.Models
 {
@@ -38,15 +39,19 @@ namespace ListSK.Models
         [RelayCommand]
         private void AddProduct()
         {
-            var chosenCategory;
-            var chosenShop;
-            var chosenUnit;
+            var chosenCategory="";
+            var chosenShop="";
+            var chosenUnit="";
             if (string.IsNullOrWhiteSpace(Name))
-                return;
-            if (string.IsNullOrWhiteSpace(Amount))
-                return;
+                Shell.Current.DisplayAlert("Błąd", "Pole 'Nazwa' nie może być puste.", "OK");
 
-            if(string.IsNullOrWhiteSpace(SelectedCategory))
+            if (!double.TryParse(Amount, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.CurrentCulture, out var amountVal))
+            {
+                Shell.Current.DisplayAlert("Błąd", "Pole 'Ilość' musi być liczbą.", "OK");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(SelectedCategory))
             {
                 chosenCategory = "Warzywa";
             }
@@ -75,8 +80,8 @@ namespace ListSK.Models
             {
                 Name = Name.Trim(),
                 Category = chosenCategory,
-                Unit = Unit ?? string.Empty,
-                Amount = double.Parse(Amount),
+                Unit = chosenUnit,
+                Amount = amountVal,
                 IsBought = false,
                 IsOptional = IsOptional,
                 Shop = chosenShop
