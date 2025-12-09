@@ -118,6 +118,10 @@ namespace ListSK.Models
                 SelectedCategory = NewCategory;
                 NewCategory = string.Empty;
             }
+            else
+            {
+                Shell.Current.DisplayAlert("Błąd", "Nazwa kategorii nie może być pusta.", "OK");
+            }
         }
         [RelayCommand]
         private void AddNewShop()
@@ -128,6 +132,10 @@ namespace ListSK.Models
                 Shops.Add(NewShop);
                 Shop = NewShop;
                 NewShop = string.Empty;
+            }
+            else
+            {
+                Shell.Current.DisplayAlert("Błąd", "Nazwa sklepu nie może być pusta.", "OK");
             }
         }
     }
