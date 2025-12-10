@@ -83,6 +83,7 @@ namespace ListSK.ViewModels
         [RelayCommand]
         public void Decrement(ProductModel product)
         {
+            if(product.Amount >0)
             product.Amount += -1;
         }
 
