@@ -26,7 +26,7 @@
         
         
 
-        <Grid ColumnDefinitions="Auto,2*,*,*,Auto,Auto" RowDefinitions="*,Auto" Margin="10">
+        <Grid ColumnDefinitions="Auto,2*,Auto,*,Auto,Auto" RowDefinitions="*,Auto" Margin="10">
             <CheckBox IsChecked="{Binding IsBought, Mode=TwoWay}"/>
             <Label Text="{Binding Name}" FontSize="Medium" Grid.Column="1" VerticalOptions="Center"/>
             <Entry Text="{Binding Amount}" Grid.Column="2" WidthRequest="50" FontSize="Medium" VerticalOptions="Center"/>

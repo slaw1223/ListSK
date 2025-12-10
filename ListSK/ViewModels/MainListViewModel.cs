@@ -84,7 +84,7 @@ namespace ListSK.ViewModels
         public void Decrement(ProductModel product)
         {
             if(product.Amount >0)
-            product.Amount += -1;
+            product.Amount -= 1;
         }
 
         [RelayCommand]
@@ -110,6 +110,7 @@ namespace ListSK.ViewModels
 
         private void Products_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            var categories = CategoryService.LoadCategories();
             if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems != null)
             {
                 foreach (ProductModel item in e.NewItems)

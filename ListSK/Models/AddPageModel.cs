@@ -24,7 +24,6 @@ namespace ListSK.Models
         [ObservableProperty] private string unit;
         [ObservableProperty] private string amount;
         [ObservableProperty] private bool isOptional;
-        [ObservableProperty] private string selectedCategory;
         [ObservableProperty] private string newCategory;
         [ObservableProperty] private string shop;
         [ObservableProperty] private string newShop;
@@ -51,13 +50,9 @@ namespace ListSK.Models
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(SelectedCategory))
+            if (!string.IsNullOrWhiteSpace(Category))
             {
-                chosenCategory = "Warzywa";
-            }
-            else 
-            {
-                chosenCategory = SelectedCategory;
+                chosenCategory = Category;
             }
             if (string.IsNullOrWhiteSpace(Shop))
             {
@@ -115,8 +110,9 @@ namespace ListSK.Models
                 CategoryService.AddCategory(NewCategory);
 
                 Categories.Add(NewCategory);
-                SelectedCategory = NewCategory;
+                Category = NewCategory;
                 NewCategory = string.Empty;
+                
             }
             else
             {
