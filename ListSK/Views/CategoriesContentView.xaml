@@ -21,6 +21,7 @@
                                                     CommandParameter="{Binding}"/>
                                 </MenuFlyout>
                             </FlyoutBase.ContextFlyout>
+                            
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />

@@ -26,7 +26,8 @@
                 Command="{Binding ClearListCommand}"/>
 
             </HorizontalStackLayout>
-            <CollectionView ItemsSource="{Binding Products}"
+
+            <CollectionView 
                         SelectionMode="None"
                         ItemSizingStrategy="MeasureAllItems"
                         >

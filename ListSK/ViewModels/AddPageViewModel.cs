@@ -58,8 +58,8 @@ namespace ListSK.ViewModels
                 }
             }
 
-                var chosenCategory = string.IsNullOrWhiteSpace(Category) ? string.Empty : Category;
-            var chosenShop = string.IsNullOrWhiteSpace(Shop) ? "Wszystkie" : Shop;
+            var chosenCategory = string.IsNullOrWhiteSpace(Category) ? Categories[0] : Category;
+            var chosenShop = string.IsNullOrWhiteSpace(Shop) ? Shops[0] : Shop;
             var chosenUnit = string.IsNullOrWhiteSpace(Unit) ? "szt" : Unit;
 
             var product = new ProductModel
@@ -83,11 +83,11 @@ namespace ListSK.ViewModels
             }
 
             Name = string.Empty;
-            Category = string.Empty;
-            Unit = string.Empty;
+            //Category = string.Empty;
+            //Unit = string.Empty;
             Amount = string.Empty;
             IsOptional = false;
-            Shop = string.Empty;
+            //Shop = string.Empty;
         }
 
         [RelayCommand]
