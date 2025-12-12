@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:models="clr-namespace:ListSK.Models"
+             xmlns:viewModels="clr-namespace:ListSK.ViewModels"
              x:Class="ListSK.Views.AddPage"
-             x:DataType="models:AddPageModel"
+             x:DataType="viewModels:AddPageViewModel"
              >
     <ScrollView>
         <VerticalStackLayout>

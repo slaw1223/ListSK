@@ -20,7 +20,7 @@ namespace ListSK
             builder.Services.AddSingleton<MainListViewModel>();
             builder.Services.AddSingleton<ShopingListView>();
             builder.Services.AddSingleton<MainListView>();
-            builder.Services.AddTransient<AddPageModel>();
+            builder.Services.AddTransient<AddPageViewModel>();
             builder.Services.AddTransient<ShopingListView>();
 
 #if DEBUG
